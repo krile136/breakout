@@ -62,5 +62,5 @@ func (m *MainScene) Update(game *Game) {
 func (M *MainScene) Draw(screen *ebiten.Image, game *Game) {
 	draw.DrawWithoutRect(screen, "ball", ball_coefficient, ballCenterX, ballCenterY, 0)
 
-	draw.Draw(screen, "blocks", 0.5, 100, 100, 0, 64, 0, 64, 24)
+	draw.Draw(screen, "blocks", 0.5, 100, 100, 0, 64, 0, blockWidth, blockHeight)
 }
