@@ -18,7 +18,7 @@ var (
 
 // 画像を描画する (Rectによる切り抜きあり)
 func Draw(screen *ebiten.Image, key string, coefficient, x_coodinates, y_coodinates, angle float64, rect_base_x, rect_base_y, rect_area_x, rect_area_y int) {
-	var image *ebiten.Image = images[key].SubImage(image.Rect(64, 0, 128, 24)).(*ebiten.Image)
+	var image *ebiten.Image = images[key].SubImage(image.Rect(rect_base_x, rect_base_y, rect_base_x+rect_area_x, rect_base_y+rect_area_y)).(*ebiten.Image)
 	calcAndDisplay(screen, image, coefficient, x_coodinates, y_coodinates, angle)
 }
 
