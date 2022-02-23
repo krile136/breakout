@@ -22,7 +22,7 @@ const (
 
 var (
 	ballCenterX   float64 = screenWidth / 2
-	ballCenterY   float64 = screenHeight / 2
+	ballCenterY   float64 = 270
 	velAngle      float64 = math.Pi / 4
 	velocity      float64 = 5
 	mouse_x       int
@@ -38,6 +38,9 @@ func (m *MainScene) Update(game *Game) {
 	if is_just_changed {
 		// シーンが切り替わったときにブロックのライフを初期化
 		fillBlocksLife()
+		ballCenterX = screenWidth / 2
+		ballCenterY = 270
+		velAngle = math.Pi / 4
 	}
 
 	mouse_x, mouse_y = ebiten.CursorPosition()
@@ -67,7 +70,13 @@ func (m *MainScene) Update(game *Game) {
 	}
 
 	prevBallCenterY := ballCenterY + moveVector.At(1, 0)
-	if prevBallCenterY-radius < 0 || prevBallCenterY+radius > screenHeight || (prevBallCenterY+radius > float64(bar_y) && prevBallCenterX >= (fixed_mouse_x-float64(blockWidth)*ball_coefficient) && prevBallCenterX <= (fixed_mouse_x+float64(blockWidth)*ball_coefficient)) {
+
+	// ボールが画面の下に行ったらゲームオーバー
+	if prevBallCenterY > screenHeight {
+		Displayed_scene = &GameOver{}
+	}
+
+	if prevBallCenterY-radius < 0 || (prevBallCenterY+radius >= float64(bar_y) && prevBallCenterY <= float64(bar_y)+float64(blockHeight)*ball_coefficient && prevBallCenterX >= (fixed_mouse_x-float64(blockWidth)*ball_coefficient) && prevBallCenterX <= (fixed_mouse_x+float64(blockWidth)*ball_coefficient)) {
 		ballCenterY -= moveVector.At(1, 0)
 		velAngle = math.Pi - velAngle
 	} else {
