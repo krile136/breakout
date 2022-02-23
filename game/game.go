@@ -14,6 +14,7 @@ const (
 var (
 	Displayed_scene Scene = &Title{} // 各シーンを持ち回る変数
 	Global_valiable int   = 0
+	is_just_changed bool  = false
 )
 
 type Game struct {
@@ -27,8 +28,14 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func (g *Game) Update() error {
 	// 実行するシーンを変数より取得
-	g.scene = Displayed_scene
+	if g.scene != Displayed_scene {
+		is_just_changed = true
+		g.scene = Displayed_scene
+	}
 	g.scene.Update(g)
+	if is_just_changed {
+		is_just_changed = false
+	}
 
 	return nil
 }
