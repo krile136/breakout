@@ -35,8 +35,8 @@ type MainScene struct {
 func (m *MainScene) Update(game *Game) {
 
 	mouse_x, mouse_y = ebiten.CursorPosition()
-
 	fixed_mouse_x = math.Max(0, math.Min(float64(mouse_x), screenWidth))
+
 	// 進行方向の角度による回転行列を生成
 	basicPostureArray := []float64{math.Cos(velAngle), -math.Sin(velAngle), math.Sin(velAngle), math.Cos(velAngle)}
 	postureRotateMatrix := mat.NewDense(2, 2, basicPostureArray)
