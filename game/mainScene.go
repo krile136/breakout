@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	ball_coefficient float64 = 0.3
-	radius           float64 = 32 * ball_coefficient / 2
+	ball_coefficient  float64 = 0.3
+	block_coefficient float64 = 0.5
+	radius            float64 = 32 * ball_coefficient / 2
 
 	bar_y = 290
 
@@ -27,12 +28,17 @@ var (
 	mouse_x       int
 	mouse_y       int
 	fixed_mouse_x float64
+	blocks        [5][5]int
 )
 
 type MainScene struct {
 }
 
 func (m *MainScene) Update(game *Game) {
+	if is_just_changed {
+		// シーンが切り替わったときにブロックのライフを初期化
+		fillBlocksLife()
+	}
 
 	mouse_x, mouse_y = ebiten.CursorPosition()
 	fixed_mouse_x = math.Max(0, math.Min(float64(mouse_x), screenWidth))
@@ -67,12 +73,52 @@ func (m *MainScene) Update(game *Game) {
 	} else {
 		ballCenterY += moveVector.At(1, 0)
 	}
+
+	reflectBallWithBlock(prevBallCenterX, prevBallCenterY, 100, 100, moveVector)
 }
 
 func (M *MainScene) Draw(screen *ebiten.Image, game *Game) {
+	// ボールを描画
 	draw.DrawWithoutRect(screen, "ball", ball_coefficient, ballCenterX, ballCenterY, 0)
 
-	draw.Draw(screen, "blocks", 0.5, 100, 100, 0, 64, 0, blockWidth, blockHeight)
-
+	// バーを描画
 	draw.DrawWithoutRect(screen, "bar", ball_coefficient, fixed_mouse_x, bar_y, 0)
+
+	// ブロックを描画
+	for i := 0; i < 5; i++ {
+		for j := 0; j < 5; j++ {
+			bx := 40 + 16 + float64(blockWidth*j)*block_coefficient
+			by := 100 + float64(blockHeight*i)*block_coefficient
+			draw.Draw(screen, "blocks", block_coefficient, bx, by, 0, 64*blocks[i][j], 0, blockWidth, blockHeight)
+		}
+	}
+
+}
+
+func reflectBallWithBlock(nb_x, nb_y, bl_x, bl_y float64, mv *mat.Dense) {
+	// 移動後のボールがブロックの中にいるとき
+	if nb_x+radius >= (bl_x-block_coefficient*float64(blockWidth/2)) && nb_x-radius <= (bl_x+block_coefficient*float64(blockWidth/2)) && nb_y+radius >= (bl_y-block_coefficient*float64(blockHeight/2)) && nb_y-radius <= (bl_y+block_coefficient*float64(blockHeight/2)) {
+		if ballCenterX >= (bl_x-block_coefficient*float64(blockWidth/2)) && ballCenterX <= (bl_x+block_coefficient*float64(blockWidth/2)) {
+			//  上下反転
+			ballCenterY -= mv.At(1, 0)
+			velAngle = math.Pi - velAngle
+		} else if ballCenterY+radius >= (bl_y-block_coefficient*float64(blockHeight/2)) && ballCenterY-radius <= (bl_y+block_coefficient*float64(blockHeight/2)) {
+			// 左右反転
+			ballCenterX -= mv.At(0, 0)
+			velAngle = math.Pi*2 - velAngle
+		} else {
+			// 上下左右反転
+			ballCenterY -= mv.At(1, 0)
+			ballCenterX -= mv.At(0, 0)
+			velAngle = math.Pi + velAngle
+		}
+	}
+}
+
+func fillBlocksLife() {
+	for i := 0; i < 5; i++ {
+		for j := 0; j < 5; j++ {
+			blocks[i][j] = 5 - i
+		}
+	}
 }
