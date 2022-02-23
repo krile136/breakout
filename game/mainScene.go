@@ -74,7 +74,20 @@ func (m *MainScene) Update(game *Game) {
 		ballCenterY += moveVector.At(1, 0)
 	}
 
-	reflectBallWithBlock(prevBallCenterX, prevBallCenterY, 100, 100, moveVector)
+reflect_label:
+	for i := 0; i < 5; i++ {
+		for j := 0; j < 5; j++ {
+			if blocks[i][j] > 0 {
+				bx := 40 + 16 + float64(blockWidth*j)*block_coefficient
+				by := 30 + float64(blockHeight*i)*block_coefficient
+				var is_hit bool = reflectBallWithBlock(prevBallCenterX, prevBallCenterY, bx, by, moveVector)
+				if is_hit {
+					blocks[i][j] -= 1
+					break reflect_label
+				}
+			}
+		}
+	}
 }
 
 func (M *MainScene) Draw(screen *ebiten.Image, game *Game) {
@@ -87,17 +100,21 @@ func (M *MainScene) Draw(screen *ebiten.Image, game *Game) {
 	// ブロックを描画
 	for i := 0; i < 5; i++ {
 		for j := 0; j < 5; j++ {
-			bx := 40 + 16 + float64(blockWidth*j)*block_coefficient
-			by := 100 + float64(blockHeight*i)*block_coefficient
-			draw.Draw(screen, "blocks", block_coefficient, bx, by, 0, 64*blocks[i][j], 0, blockWidth, blockHeight)
+			if blocks[i][j] > 0 {
+				bx := 40 + 16 + float64(blockWidth*j)*block_coefficient
+				by := 30 + float64(blockHeight*i)*block_coefficient
+				draw.Draw(screen, "blocks", block_coefficient, bx, by, 0, 64*blocks[i][j], 0, blockWidth, blockHeight)
+			}
 		}
 	}
 
 }
 
-func reflectBallWithBlock(nb_x, nb_y, bl_x, bl_y float64, mv *mat.Dense) {
+func reflectBallWithBlock(nb_x, nb_y, bl_x, bl_y float64, mv *mat.Dense) bool {
 	// 移動後のボールがブロックの中にいるとき
+	var is_hit bool = false
 	if nb_x+radius >= (bl_x-block_coefficient*float64(blockWidth/2)) && nb_x-radius <= (bl_x+block_coefficient*float64(blockWidth/2)) && nb_y+radius >= (bl_y-block_coefficient*float64(blockHeight/2)) && nb_y-radius <= (bl_y+block_coefficient*float64(blockHeight/2)) {
+		is_hit = true
 		if ballCenterX >= (bl_x-block_coefficient*float64(blockWidth/2)) && ballCenterX <= (bl_x+block_coefficient*float64(blockWidth/2)) {
 			//  上下反転
 			ballCenterY -= mv.At(1, 0)
@@ -113,6 +130,8 @@ func reflectBallWithBlock(nb_x, nb_y, bl_x, bl_y float64, mv *mat.Dense) {
 			velAngle = math.Pi + velAngle
 		}
 	}
+
+	return is_hit
 }
 
 func fillBlocksLife() {
