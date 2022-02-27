@@ -26,7 +26,6 @@ var (
 	velAngle      float64 = math.Pi / 4
 	velocity      float64 = 5
 	mouse_x       int
-	mouse_y       int
 	fixed_mouse_x float64
 	blocks        [5][5]int
 )
@@ -43,7 +42,7 @@ func (m *MainScene) Update(game *Game) {
 		velAngle = math.Pi / 4
 	}
 
-	mouse_x, mouse_y = ebiten.CursorPosition()
+	mouse_x, _ = ebiten.CursorPosition()
 	fixed_mouse_x = math.Max(0, math.Min(float64(mouse_x), screenWidth))
 
 	// 進行方向の角度による回転行列を生成
